@@ -10,12 +10,14 @@ var Sprite = function (x, y, resource){
  
 Sprite.prototype.increment = function(coord, by){
   var attr = coord == 'x' ? 'x' : 'y';
-  this[attr] = by;
+  this[attr] += by;
 }
 
 Sprite.prototype.render = function(context){
   context.drawImage(this.image, this.currentFrame * this.frameWidth, 0, this.frameWidth, this.frameHeight, this.x, this.y, this.frameWidth, this.frameHeight);
-  this.currentFrame = this.currentFrame == this.framesCount - 1 ? 0 : this.currentFrame + 1;
+  if (Math.random() < 0.6) {
+    this.currentFrame = this.currentFrame == this.framesCount - 1 ? 0 : this.currentFrame + 1;
+  }
 };
 
 window.Sprite = Sprite;
