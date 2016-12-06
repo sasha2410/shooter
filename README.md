@@ -1,3 +1,3 @@
-# Test
+# Shooter
 
-http://rawgit.com/sasha2410/test/master/game.html
+http://rawgit.com/sasha2410/shooter/master/game.html
