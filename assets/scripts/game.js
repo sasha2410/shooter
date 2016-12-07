@@ -1,38 +1,13 @@
-var globalSpeed = 6;
-
 var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
                             window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;  
 
-var resources = { 
-  helicopter: { 
-    url: 'assets/models/hcopter.png', 
-    framesCount: 3, 
-    frameWidth: 20, 
-    frameHeight: 38,
-    cachedImage: null 
-  },
-  ship: { 
-    url: 'assets/models/spaceship.png', 
-    framesCount: 4, 
-    frameWidth: 100, 
-    frameHeight: 150,
-    cachedImage: null 
-  },
-  shot: { 
-    url: 'assets/models/shot.png', 
-    framesCount: 1, 
-    frameWidth: 43, 
-    frameHeight: 74,
-    cachedImage: null 
-  }
-};
-var player = {};
+var resources = gameSettings.resources;
+var player = null;
 var shots = [];
 var objects = [];
 var keysPressed = {};
 
 var canvas, context, loader = new ResourcesLoader(resources);
-
 
 var render = function(){
   context.clearRect(0, 0, canvas.width, canvas.height);
@@ -55,9 +30,11 @@ var render = function(){
 };
 
 var update = function(dt){
-  for(var i in keysPressed){ player.increment(keysPressed[i].coord, keysPressed[i].speed); }
-  for(var i in shots){ shots[i].increment(shots[i].coord, shots[i].speed); }
-  for(var i in objects){ objects[i].increment(objects[i].coord, objects[i].speed); }
+  for(var i in keysPressed){ player.increment(keysPressed[i].coord, keysPressed[i].speed) }
+  for(var i in shots){ shots[i].increment(shots[i].coord, shots[i].speed) }
+  for(var i in objects){ objects[i].increment(objects[i].coord, objects[i].speed) }
+  var box = { x: 0, y: 0, width: canvas.width, height: canvas.height };
+  if (player) { player.setToBox(box); }
 };
 
 var lastTime;
@@ -80,23 +57,23 @@ var addEvents = function(){
 	switch (ev.keyCode.toString()){
 	  case '37':
 	    // left
-		keysPressed[ev.keyCode] = { speed: -globalSpeed, coord: 'x' };
+		keysPressed[ev.keyCode] = { speed: -gameSettings.globalSpeed, coord: 'x' };
 		break;
 	  case '38':
         // up
-		keysPressed[ev.keyCode] = { speed: -globalSpeed, coord: 'y' };
+		keysPressed[ev.keyCode] = { speed: -gameSettings.globalSpeed, coord: 'y' };
 		break;
       case '39':
         // right	
-        keysPressed[ev.keyCode] = { speed: globalSpeed, coord: 'x' };
+        keysPressed[ev.keyCode] = { speed: gameSettings.globalSpeed, coord: 'x' };
 		break;
       case '40':
         //down	
-        keysPressed[ev.keyCode] = { speed: globalSpeed, coord: 'y' };	
+        keysPressed[ev.keyCode] = { speed: gameSettings.globalSpeed, coord: 'y' };	
 		break;
       case '32':
         //space
-        shot(player);		
+        shots.push(new Shot(player, resources.playerShot, 'top').shotSprite);		
 	}
   });
   document.addEventListener('keyup', function(ev){
@@ -105,18 +82,24 @@ var addEvents = function(){
   });	
 };
 
-var shot = function(parent){
-  var sprite = new Sprite(parent.x + parent.frameWidth / 2 - resources.shot.frameWidth / 2, parent.y, resources.shot);
-  sprite.speed = -(globalSpeed * (1.8 + Math.random(5) / 10) );
-  sprite.coord = 'y'
-  shots.push(sprite);
+var setCanvas = function(){
+  var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+  var h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+  if (canvas) { 
+    canvas.width = w;
+    canvas.height = h;
+    context = canvas.getContext('2d');
+  }
 }
 
 var initialize = function(){
   canvas = document.getElementById('game');
   context = canvas.getContext('2d');
+  setCanvas();
+  window.onresize = function(){ setCanvas() };
   loader.load(function(){
-    player = new Sprite(canvas.width / 2 - resources.ship.frameWidth / 2, canvas.height - resources.ship.frameHeight, resources.ship);
+    var item = resources.playerShip;
+    player = new Sprite(canvas.width / 2 - item.frameWidth / 2, canvas.height - item.frameHeight, item);
 	addEvents();
   });
   main();

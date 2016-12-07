@@ -13,6 +13,13 @@ Sprite.prototype.increment = function(coord, by){
   this[attr] += by;
 }
 
+Sprite.prototype.setToBox = function(box){
+  if (this.x < box.x) this.x = box.x;
+  if (this.y < box.y) this.y = box.y;
+  if (this.x + this.frameWidth > box.width) this.x = box.width - this.frameWidth;
+  if (this.y + this.frameHeight > box.height) this.y = box.height - this.frameHeight;
+}
+
 Sprite.prototype.render = function(context){
   context.drawImage(this.image, this.currentFrame * this.frameWidth, 0, this.frameWidth, this.frameHeight, this.x, this.y, this.frameWidth, this.frameHeight);
   if (Math.random() < 0.6) {
