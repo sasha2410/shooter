@@ -4,10 +4,12 @@ var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAni
 var resources = gameSettings.resources;
 var player = null;
 var shots = [];
-var objects = [];
+var enemies = [];
+var booms = [];
 var keysPressed = {};
 
-var canvas, context, loader = new ResourcesLoader(resources);
+var canvas, context, loader = new ResourcesLoader(resources), 
+    waveGenerator = new WaveGenerator([resources.enemyShip1, resources.enemyShip2, resources.enemyShip3], gameSettings.globalSpeed * 0.5);
 
 var render = function(){
   context.clearRect(0, 0, canvas.width, canvas.height);
@@ -16,7 +18,8 @@ var render = function(){
     context.fillStyle = '#000000';
     context.fillRect(0, 0, canvas.width, canvas.height);
 	for(var i in shots){ shots[i].render(context); }
-    for(var i in objects){ objects[i].render(context); }
+    for(var i in enemies){ enemies[i].render(context); }
+	for(var i in booms){ booms[i].render(context); }
 	player.render(context);
   }
   else
@@ -29,12 +32,32 @@ var render = function(){
   }
 };
 
+var getBox = function(){ return { x: 0, y: 0, frameWidth: canvas.width, frameHeight: canvas.height } };
+
+var filterArrays = function(){
+  for(var i = shots.length - 1; i >= 0; i--){ if (shots[i].outsideOfBox(getBox())) shots.splice(i, 1) }
+  for(var i = booms.length - 1; i >= 0; i--){ if (booms[i].canBeRemoved()) booms.splice(i, 1) }  
+};
+
+var calculateCollisions = function(){
+  for(var i = shots.length - 1; i >= 0; i--){ 
+    for (var j = enemies.length - 1; j >= 0; j--)
+	  if (shots[i] && enemies[j] && helper.collide(shots[i], enemies[j])){
+		var enemy = enemies[j]
+		var boom = resources.boom;
+		booms.push(new Sprite(enemy.x + enemy.frameWidth / 2 - boom.frameWidth / 2, enemy.y + enemy.frameHeight - boom.frameHeight, boom, false));
+		shots.splice(i, 1);
+		enemies.splice(j, 1);
+		break;
+	  }
+  }
+};
+
 var update = function(dt){
   for(var i in keysPressed){ player.increment(keysPressed[i].coord, keysPressed[i].speed) }
   for(var i in shots){ shots[i].increment(shots[i].coord, shots[i].speed) }
-  for(var i in objects){ objects[i].increment(objects[i].coord, objects[i].speed) }
-  var box = { x: 0, y: 0, width: canvas.width, height: canvas.height };
-  if (player) { player.setToBox(box); }
+  for(var i in enemies){ enemies[i].increment(enemies[i].coord, enemies[i].speed) }
+  if (player) { player.setToBox(getBox()); }
 };
 
 var lastTime;
@@ -43,8 +66,9 @@ var main = function(){
   var now = Date.now();
   var dt = (now - lastTime) / 1000.0;
   
+  filterArrays();
+  calculateCollisions();
   update(dt);
- 
   render();
   
   lastTime = now;
@@ -101,6 +125,8 @@ var initialize = function(){
     var item = resources.playerShip;
     player = new Sprite(canvas.width / 2 - item.frameWidth / 2, canvas.height - item.frameHeight, item);
 	addEvents();
+	
+	waveGenerator.generate(enemies, getBox(), 10);
   });
   main();
 };

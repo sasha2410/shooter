@@ -36,6 +36,13 @@ window.gameSettings = {
       frameHeight: 61,
       cachedImage: null 
     },
+	boom: { 
+      url: 'assets/models/boom.png', 
+      framesCount: 5, 
+      frameWidth: 130, 
+      frameHeight: 130,
+      cachedImage: null 
+    },
     enemyShot: { 
       url: 'assets/models/enemy_shot.png', 
       framesCount: 1, 
