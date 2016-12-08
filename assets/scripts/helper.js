@@ -21,6 +21,12 @@ window.helper = {
     return (sprite.y > box.y + box.frameHeight)
   },
 
+  prepareOffsets: function(ev) {
+    if (ev.offsetX || !ev.touches) return;
+    ev.offsetX = ev.touches[0].pageX - $(ev.touches[0].target).offset().left;
+    ev.offsetY = ev.touches[0].pageY - $(ev.touches[0].target).offset().top;
+  },
+
   random: function(max, min){
     if (!min){ min = 0 }
     return Math.floor(Math.random() * (max - min)) + min;

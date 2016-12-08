@@ -1,37 +1,3 @@
-var loading = function(game){
-  this.fillStyle = '#000000';
-  this.fillRect(0, 0, game.canvas.width, game.canvas.height);
-  this.strokeStyle = '#ffffff';
-  this.font = "30px Verdana";
-  this.strokeText("Loading...", game.canvas.width / 2 - (15*10 / 2), game.canvas.height / 2 - 15)
-};
-
-var renderScore = function(game){
-  this.save();
-  this.globalAlpha = 0.8;
-  this.fillStyle = '#000000';
-  this.fillRect(0, 0, game.canvas.width, 30);
-  this.globalAlpha = 1;
-  this.strokeStyle = '#ffffff';
-  this.font = "14px Verdana";
-  this.strokeText("Score : " + game.stats.score, 0, 15);
-  var waveText = "Wave Number : " + game.stats.wave;
-  this.strokeText(waveText, game.canvas.width - (waveText.length * 14), 15);
-  this.restore();
-};
-
-var renderPrepare = function(game){
-  this.save();
-  game.context.fillStyle = '#000000';
-  game.context.fillRect(0, 0, game.canvas.width, game.canvas.height);
-  game.context.strokeStyle = '#ffffff';
-  game.context.font = "30px Verdana";
-  var text = "Prepare to wave " + game.stats.wave + "... ( " + game.stats.counter + " )";
-  game.context.strokeText(text, game.canvas.width / 2 - (15 * text.length / 2), game.canvas.height / 2 - 15)
-  this.restore();
-};
-
-
 var GameDirector = function(game){
   this.game = game;
   this.busyWave = false;
@@ -45,6 +11,18 @@ var GameDirector = function(game){
 GameDirector.prototype.getBox = function(){ return { x: 0, y: 0, frameWidth: this.game.canvas.width, frameHeight: this.game.canvas.height } };
 
 GameDirector.prototype.addEvents = function(){
+  var _this = this;
+
+  this.game.canvas.addEventListener('mousedown', function(ev){
+    helper.prepareOffsets(ev);
+
+    for(var i in screens.buttons){
+      var point = { x: ev.offsetX, y: ev.offsetY, frameWidth: 1, frameHeight: 1 };
+      var button = screens.buttons[i];
+      if (helper.collide(point, button)){ _this[button.action]() }
+    }
+  });
+
   document.addEventListener('keydown', function(ev){
     ev.preventDefault();
     switch (ev.keyCode.toString()){
@@ -66,7 +44,7 @@ GameDirector.prototype.addEvents = function(){
         break;
       case '32':
         //space
-        game.shots.push(new Shot(game.player, game.resources.playerShot, 'top').shotSprite);
+        if (game.player) game.shots.push(fire(game.player, game.resources.playerShot, 'top'));
     }
   });
   document.addEventListener('keyup', function(ev){
@@ -75,40 +53,87 @@ GameDirector.prototype.addEvents = function(){
 };
 
 GameDirector.prototype.setLoading = function(){
-  this.game.operations.loading = loading;
+  this.game.operations.loading = screens.loading;
+};
+
+GameDirector.prototype.setBackground = function(resource){
+  this.game.background.getContext('2d').drawImage(resource.cachedImage, 0, 0, game.canvas.width, game.canvas.height, 0, 0, game.canvas.width, game.canvas.height);
+};
+
+GameDirector.prototype.setPlayer = function(resource){
+  this.game.player = new Sprite(this.game.canvas.width / 2 - resource.frameWidth / 2, game.canvas.height - resource.frameHeight, resource);
+};
+
+GameDirector.prototype.initGame = function(){
+  this.stopWave();
+  this.setBackground(this.game.resources.background);
+  this.setPlayer(this.game.resources.playerShip);
+  this.game.shots = [];
+  this.game.enemies = [];
+  this.game.booms = [];
+  this.game.keysPressed = [];
+  this.game.stats.wave = 0;
+  this.game.stats.score = 0;
+  this.game.operations = {};
+  this.busyWave = false;
+  this.game.stats.mode = 'play';
+};
+
+GameDirector.prototype.stopWave = function(){
+  if (this.waveId) { clearInterval(this.waveId) }
 };
 
 GameDirector.prototype.initWave = function(timeToWait){
   var _this = this;
-  this.busyWave = true;
-  game.stats.counter = timeToWait;
-  this.game.operations = { renderPrepare: renderPrepare };
-  var intId = setInterval(function(){
-    if (_this.game.stats.counter == 0){
-      clearInterval(intId);
+  this.game.stats.counter = timeToWait;
+  this.game.operations = { renderPrepare: screens.renderPrepare };
+  this.stopWave();
+  this.waveId = setInterval(function(){
+    if (_this.game.stats.counter > 1) _this.game.stats.counter -= 1;
+    else {
+      _this.stopWave();
       delete _this.game.operations.renderPrepare;
       delete _this.game.stats.counter;
-      _this.game.operations.renderScore = renderScore;
+      _this.game.operations.renderScore = screens.renderScore;
       _this.waveGenerator.generate(_this.game.enemies, _this.getBox(), 10, gameSettings.globalSpeed * 0.5);
       _this.busyWave = false;
+      _this.game.stats.wave += 1;
     }
-    else _this.game.stats.counter -= 1;
   }, 1000);
 };
 
-GameDirector.prototype.run = function(){
-  var lastTime = Date.now();
-  var dt = (Date.now() - lastTime) / 1000.0;
-
-  this.addEvents();
-  delete this.game.operations.loading;
+GameDirector.prototype.gameHandler = function(){
   var _this = this;
-  var intId = setInterval(function(){
-    if (!_this.busyWave && !_this.game.enemies.length){
-      _this.game.stats.wave += 1;
-      _this.initWave(5)
+
+  if (this.game.stats.mode == 'play' && !this.busyWave && !this.game.enemies.length){
+    this.busyWave = true;
+    if (this.game.stats.wave > 0){
+      var intId = setInterval(function(){
+        clearInterval(intId);
+        _this.initWave(3);
+      }, 1000);
     }
-  }, 100);
+    else this.initWave(3);
+  }
+  else if (!this.busyWave && this.game.stats.mode == 'startScreen') {
+    this.game.operations = { startScreen: screens.startScreen };
+  }
+  else if (!this.busyWave && this.game.stats.mode == 'gameOverScreen'){
+    this.busyWave = true;
+    var intId = setInterval(function(){
+      clearInterval(intId);
+      this.game.operations = { gameOverScreen: screens.gameOverScreen };
+    }, 2000);
+  }
+};
+
+GameDirector.prototype.run = function(){
+  this.addEvents();
+  this.game.operations = {};
+  this.game.stats.mode = 'startScreen';
+
+  var _this = this;
+  setInterval(function(){ _this.gameHandler() }, 100);
 };
 
 window.GameDirector = GameDirector;

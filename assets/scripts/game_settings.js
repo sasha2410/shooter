@@ -55,4 +55,4 @@ window.gameSettings = {
       cachedImage: null 
     }
   }
-}
+};

@@ -14,7 +14,8 @@ var game = {
   context: null,
   background: null,
   rootEl: null,
-  stats: { score: 0, wave: 0 }
+  // mode: [startScreen, gameOverScreen, play, ]
+  stats: { score: 0, wave: 0, mode: 'startScreen' }
 };
 
 var loader = new ResourcesLoader(game.resources), gameDirector = new GameDirector(game);
@@ -25,7 +26,7 @@ var render = function(){
   for(var i in game.enemies){ game.enemies[i].render(game.context) };
   for(var i in game.booms){ game.booms[i].render(game.context) };
   if (game.player) game.player.render(game.context);
-  for(var i in game.operations) { game.operations[i].call(game.context, game) };
+  for(var i in game.operations) { game.operations[i].call(game.context, game) }
 };
 
 var filterArrays = function(){
@@ -35,6 +36,18 @@ var filterArrays = function(){
 };
 
 var calculateCollisions = function(){
+  for (var i = game.enemies.length - 1; i >= 0; i--) {
+    var enemy = game.enemies[i];
+    if (enemy && game.player && helper.collide(enemy, game.player)) {
+      var boom = game.resources.boom;
+      game.booms.push(new Sprite(enemy.x + enemy.frameWidth / 2 - boom.frameWidth / 2, enemy.y + enemy.frameHeight - boom.frameHeight, boom, false));
+      game.enemies.splice(j, 1);
+      game.player = null;
+      game.stats.mode = 'gameOverScreen';
+      break;
+    }
+  }
+
   for(var i = game.shots.length - 1; i >= 0; i--){
     var shot = game.shots[i];
     for (var j = game.enemies.length - 1; j >= 0; j--) {
@@ -49,10 +62,14 @@ var calculateCollisions = function(){
       }
     }
   }
+
+
 };
 
 var update = function(){
-  for(var i in game.keysPressed){ var key = game.keysPressed[i]; game.player.increment(key.coord, key.speed) }
+  if (game.player){
+    for(var i in game.keysPressed){ var key = game.keysPressed[i]; game.player.increment(key.coord, key.speed) }
+  }
   for(var i in game.shots){ var shot = game.shots[i]; shot.increment(shot.coord, shot.speed) }
   for(var i in game.enemies){ var enemy = game.enemies[i]; enemy.increment(enemy.coord, enemy.speed) }
   if (game.player) { game.player.setToBox(gameDirector.getBox()); }
@@ -89,10 +106,6 @@ var setCanvas = function(){
   }
 };
 
-var setBackground = function(){
-  game.background.getContext('2d').drawImage(game.resources.background.cachedImage, 0, 0, game.canvas.width, game.canvas.height, 0, 0, game.canvas.width, game.canvas.height);
-};
-
 var initialize = function(){
   game.rootEl = document.createElement('div');
   game.rootEl.id = 'root_el';
@@ -109,11 +122,6 @@ var initialize = function(){
   gameDirector.setLoading();
   main();
 
-  loader.load(function(){
-    var item = game.resources.playerShip;
-    setBackground();
-    game.player = new Sprite(game.canvas.width / 2 - item.frameWidth / 2, game.canvas.height - item.frameHeight, item);
-    new GameDirector(game).run();
-  });
+  loader.load(function(){ new GameDirector(game).run() });
 
 };
