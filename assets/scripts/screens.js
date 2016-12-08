@@ -109,8 +109,12 @@ var renderPrepare = function(game){
   game.context.fillRect(0, 0, game.canvas.width, game.canvas.height);
   game.context.strokeStyle = '#ffffff';
   game.context.font = "30px Verdana";
-  var text = "Prepare to wave " + game.stats.wave + "... ( " + game.stats.counter + " )";
-  game.context.strokeText(text, game.canvas.width / 2 - (15 * text.length / 2), game.canvas.height / 2 - 15)
+  var text1 = "Prepare to"; 
+  var text2 = "ALIEN WAVE " + game.stats.wave;
+  var text3 = "( " + game.stats.counter + " )";
+  game.context.strokeText(text1, game.canvas.width / 2 - (15 * text1.length / 2), game.canvas.height / 2 - 50)
+  game.context.strokeText(text2, game.canvas.width / 2 - (17 * text2.length / 2), game.canvas.height / 2 - 15)
+  game.context.strokeText(text3, game.canvas.width / 2 - (15 * text3.length / 2), game.canvas.height / 2 + 30)
   this.restore();
 };
 
