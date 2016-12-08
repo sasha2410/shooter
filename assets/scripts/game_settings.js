@@ -1,32 +1,36 @@
 window.gameSettings = {
   globalSpeed: 6,
-  resources: { 
+  resources: {
+    background: {
+      url: 'assets/models/background.jpg',
+      cachedImage: null
+    },
     playerShip: { 
-      url: 'assets/models/spaceship.png', 
+      url: 'assets/models/player_ship.png',
       framesCount: 4, 
-      frameWidth: 100, 
-      frameHeight: 150,
+      frameWidth: 50,
+      frameHeight: 75,
       cachedImage: null 
     },
     enemyShip1: {
       url: 'assets/models/enemy_ship1.png', 
       framesCount: 1, 
-      frameWidth: 130, 
-      frameHeight: 142,
+      frameWidth: 60,
+      frameHeight: 66,
       cachedImage: null
     },
     enemyShip2: {
       url: 'assets/models/enemy_ship2.png', 
       framesCount: 1, 
-      frameWidth: 130, 
-      frameHeight: 148,
+      frameWidth: 60,
+      frameHeight: 68,
       cachedImage: null
     },
     enemyShip3: {
       url: 'assets/models/enemy_ship3.png', 
       framesCount: 1, 
-      frameWidth: 130, 
-      frameHeight: 199,
+      frameWidth: 60,
+      frameHeight: 92,
       cachedImage: null
     },
     playerShot: { 
@@ -39,8 +43,8 @@ window.gameSettings = {
 	boom: { 
       url: 'assets/models/boom.png', 
       framesCount: 5, 
-      frameWidth: 130, 
-      frameHeight: 130,
+      frameWidth: 70,
+      frameHeight: 70,
       cachedImage: null 
     },
     enemyShot: { 

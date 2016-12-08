@@ -1,5 +1,9 @@
 var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
                             window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;  
+var gameStats = {
+  score: 0,
+  waveNumber: 0
+};
 
 var resources = gameSettings.resources;
 var player = null;
@@ -8,19 +12,17 @@ var enemies = [];
 var booms = [];
 var keysPressed = {};
 
-var canvas, context, loader = new ResourcesLoader(resources), 
+var rootEl, background, canvas, context, loader = new ResourcesLoader(resources),
     waveGenerator = new WaveGenerator([resources.enemyShip1, resources.enemyShip2, resources.enemyShip3], gameSettings.globalSpeed * 0.5);
 
 var render = function(){
   context.clearRect(0, 0, canvas.width, canvas.height);
   
   if (loader.loaded){
-    context.fillStyle = '#000000';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-	for(var i in shots){ shots[i].render(context); }
+    for(var i in shots){ shots[i].render(context); }
     for(var i in enemies){ enemies[i].render(context); }
-	for(var i in booms){ booms[i].render(context); }
-	player.render(context);
+    for(var i in booms){ booms[i].render(context); }
+    player.render(context);
   }
   else
   {
@@ -40,16 +42,18 @@ var filterArrays = function(){
 };
 
 var calculateCollisions = function(){
-  for(var i = shots.length - 1; i >= 0; i--){ 
-    for (var j = enemies.length - 1; j >= 0; j--)
-	  if (shots[i] && enemies[j] && helper.collide(shots[i], enemies[j])){
-		var enemy = enemies[j]
-		var boom = resources.boom;
-		booms.push(new Sprite(enemy.x + enemy.frameWidth / 2 - boom.frameWidth / 2, enemy.y + enemy.frameHeight - boom.frameHeight, boom, false));
-		shots.splice(i, 1);
-		enemies.splice(j, 1);
-		break;
-	  }
+  for(var i = shots.length - 1; i >= 0; i--){
+    var shot = shots[i];
+    for (var j = enemies.length - 1; j >= 0; j--) {
+      var enemy = enemies[j];
+      if (shot && enemy && helper.collide(shot, enemy)) {
+        var boom = resources.boom;
+        booms.push(new Sprite(enemy.x + enemy.frameWidth / 2 - boom.frameWidth / 2, enemy.y + enemy.frameHeight - boom.frameHeight, boom, false));
+        shots.splice(i, 1);
+        enemies.splice(j, 1);
+        break;
+      }
+    }
   }
 };
 
@@ -106,27 +110,47 @@ var addEvents = function(){
   });	
 };
 
+var width = 320, height = 568;
+
 var setCanvas = function(){
-  var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-  var h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-  if (canvas) { 
-    canvas.width = w;
-    canvas.height = h;
+  //var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+  //var h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+  if (canvas) {
+    rootEl.style.width = width + 'px';
+    rootEl.style.height = height + 'px';
+    background.width = width;
+    background.height = height;
+    canvas.width = width;
+    canvas.height = height;
     context = canvas.getContext('2d');
   }
-}
+};
+
+var setBackground = function(){
+  background.getContext('2d').drawImage(resources.background.cachedImage, 0, 0, width, height, 0, 0, width, height);
+};
 
 var initialize = function(){
-  canvas = document.getElementById('game');
+  rootEl = document.createElement('div');
+  rootEl.id = 'root_el';
+  background = document.createElement('canvas');
+  background.id = 'background';
+  canvas = document.createElement('canvas');
+  canvas.id = 'game';
+  document.body.insertBefore(rootEl, document.body.childNodes[0]);
+  rootEl.insertBefore(background, rootEl.childNodes[0]);
+  rootEl.insertBefore(canvas, rootEl.childNodes[0]);
+
   context = canvas.getContext('2d');
   setCanvas();
-  window.onresize = function(){ setCanvas() };
+
+  //window.onresize = function(){ setCanvas() };
   loader.load(function(){
     var item = resources.playerShip;
+    setBackground();
     player = new Sprite(canvas.width / 2 - item.frameWidth / 2, canvas.height - item.frameHeight, item);
-	addEvents();
-	
-	waveGenerator.generate(enemies, getBox(), 10);
+	  addEvents();
+	  waveGenerator.generate(enemies, getBox(), 10);
   });
   main();
 };
