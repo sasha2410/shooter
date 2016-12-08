@@ -32,8 +32,8 @@ window.gameSettings = {
     playerShot: { 
       url: 'assets/models/player_shot.png', 
       framesCount: 1, 
-      frameWidth: 33, 
-      frameHeight: 61,
+      frameWidth: 15,
+      frameHeight: 26,
       cachedImage: null 
     },
 	boom: { 
