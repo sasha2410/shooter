@@ -92,8 +92,8 @@ var maxWidth = 600, maxHeight = 600;
 
 var setCanvas = function(){
   var ios = helper.ios();
-  var dw = ios ? screen.width : window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-  var dh = ios ? screen.height : window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+  var dw =  window.innerWidth; //ios ? screen.width : window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+  var dh = window.innerHeight; //ios ? screen.height : window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
   var width = dw > maxWidth ? maxWidth : dw;
   var height = dh > maxHeight ? maxHeight : dh;
   if (game.canvas) {
