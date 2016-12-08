@@ -133,6 +133,7 @@ GameDirector.prototype.initGame = function(){
   this.game.operations = {};
   this.busyWave = false;
   this.game.stats.mode = 'play';
+  for( var i in screens.buttons){ delete screens.buttons[i] };
 };
 
 GameDirector.prototype.stopWave = function(){

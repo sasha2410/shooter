@@ -1,7 +1,5 @@
 var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
                             window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-							
-window.onerror = function(msg){ alert(msg) };
 
 var game = {
   resources: gameSettings.resources,
