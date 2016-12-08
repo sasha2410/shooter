@@ -1,5 +1,7 @@
 var GameDirector = function(game){
   this.game = game;
+  this.backgroundResource = game.resources.background;
+  this.playerResource = game.resources.playerShip;
   this.busyWave = false;
   this.waveGenerator = new WaveGenerator([
     this.game.resources.enemyShip1,
@@ -8,7 +10,11 @@ var GameDirector = function(game){
   ]);
 };
 
-GameDirector.prototype.getBox = function(){ return { x: 0, y: 0, frameWidth: this.game.canvas.width, frameHeight: this.game.canvas.height } };
+GameDirector.prototype.getBox = function(){ return { x: 0, y: 0, frameWidth: this.game.canvas.width, frameHeight: this.game.canvas.height - screens.fireButtonHeight } };
+
+GameDirector.prototype.playerFire = function(){
+  if (this.game.player) this.game.shots.push(this.game.player.fire());
+}
 
 GameDirector.prototype.addEvents = function(){
   var _this = this;
@@ -28,46 +34,93 @@ GameDirector.prototype.addEvents = function(){
     switch (ev.keyCode.toString()){
       case '37':
         // left
-        game.keysPressed[ev.keyCode] = { speed: -gameSettings.globalSpeed, coord: 'x' };
+        _this.game.keysPressed[ev.keyCode] = { speed: -gameSettings.globalSpeed, coord: 'x' };
         break;
       case '38':
         // up
-        game.keysPressed[ev.keyCode] = { speed: -gameSettings.globalSpeed, coord: 'y' };
+        _this.game.keysPressed[ev.keyCode] = { speed: -gameSettings.globalSpeed, coord: 'y' };
         break;
       case '39':
         // right
-        game.keysPressed[ev.keyCode] = { speed: gameSettings.globalSpeed, coord: 'x' };
+        _this.game.keysPressed[ev.keyCode] = { speed: gameSettings.globalSpeed, coord: 'x' };
         break;
       case '40':
         //down
-        game.keysPressed[ev.keyCode] = { speed: gameSettings.globalSpeed, coord: 'y' };
+        _this.game.keysPressed[ev.keyCode] = { speed: gameSettings.globalSpeed, coord: 'y' };
         break;
       case '32':
         //space
-        if (game.player) game.shots.push(fire(game.player, game.resources.playerShot, 'top'));
+		_this.playerFire();
     }
   });
   document.addEventListener('keyup', function(ev){
     delete game.keysPressed[ev.keyCode];
   });
+  
+  // touch events
+  
+  var touchStart = function(ev){
+	ev.preventDefault();
+	helper.prepareOffsets(ev);
+	var player = this.game.player;
+	if (!player) return;
+	 
+	var playerX = player.x + player.frameWidth / 2;
+	var playerY = player.y + player.frameHeight / 2; 
+	if (ev.offsetY >= this.game.canvas.height - screens.fireButtonHeight) return;
+	 
+	var angle = Math.atan2(ev.offsetY - playerY, ev.offsetX - playerX) * 180 / Math.PI;
+	var sign = angle < 0 ? -1 : 1;
+	var quarter = Math.floor(Math.abs(angle / 90)) + 1;
+	var quarterAngle = Math.abs(angle) - (quarter - 1) * 90;
+	var speedX, speedY;
+	switch(quarter){
+	  case 1:
+	    speedY = quarterAngle / 90 * sign;
+		speedX = (1 - Math.abs(speedY));
+        break;
+      case 2:
+	    speedX = quarterAngle / 90 * -1;
+		speedY = (1 - Math.abs(speedX)) * sign;
+        break;		 
+	}
+	this.game.keysPressed.touchX = { speed: gameSettings.globalSpeed * speedX, coord: 'x' };
+	this.game.keysPressed.touchY = { speed: gameSettings.globalSpeed * speedY, coord: 'y' };
+  }
+  
+  var touchEnd = function(ev){
+	ev.preventDefault();
+	delete this.game.keysPressed['touchX'];
+	delete this.game.keysPressed['touchY'];    
+  }
+  
+  _this.game.canvas.addEventListener('mousedown', function(ev){ touchStart.call(_this, ev) });
+  _this.game.canvas.addEventListener('touchstart', function(ev){ touchStart.call(_this, ev) });
+	
+  _this.game.canvas.addEventListener('mouseup', function(ev){ touchEnd.call(_this, ev) });	
+  _this.game.canvas.addEventListener('touchend', function(ev){ touchEnd.call(_this, ev) });
+
 };
 
 GameDirector.prototype.setLoading = function(){
   this.game.operations.loading = screens.loading;
 };
 
-GameDirector.prototype.setBackground = function(resource){
-  this.game.background.getContext('2d').drawImage(resource.cachedImage, 0, 0, game.canvas.width, game.canvas.height, 0, 0, game.canvas.width, game.canvas.height);
+GameDirector.prototype.setBackground = function(){
+  var r = this.backgroundResource;
+  this.game.background.getContext('2d').drawImage(r.cachedImage, 0, 0, game.canvas.width, game.canvas.height, 0, 0, game.canvas.width, game.canvas.height);
 };
 
-GameDirector.prototype.setPlayer = function(resource){
-  this.game.player = new Sprite(this.game.canvas.width / 2 - resource.frameWidth / 2, game.canvas.height - resource.frameHeight, resource);
+GameDirector.prototype.setPlayer = function(){
+  var r = this.playerResource;
+  var box = this.getBox();
+  this.game.player = new Sprite(box.frameWidth / 2 - r.frameWidth / 2, box.frameHeight - r.frameHeight, r);
 };
 
 GameDirector.prototype.initGame = function(){
   this.stopWave();
-  this.setBackground(this.game.resources.background);
-  this.setPlayer(this.game.resources.playerShip);
+  this.setBackground();
+  this.setPlayer();
   this.game.shots = [];
   this.game.enemies = [];
   this.game.booms = [];
@@ -91,11 +144,14 @@ GameDirector.prototype.initWave = function(timeToWait){
   this.waveId = setInterval(function(){
     if (_this.game.stats.counter > 1) _this.game.stats.counter -= 1;
     else {
+	  _this.setPlayer();
       _this.stopWave();
-      delete _this.game.operations.renderPrepare;
-      delete _this.game.stats.counter;
-      _this.game.operations.renderScore = screens.renderScore;
-      _this.waveGenerator.generate(_this.game.enemies, _this.getBox(), 10, gameSettings.globalSpeed * 0.5);
+      _this.game.operations = {
+	    renderFireButton: screens.renderFireButton,
+        renderScore: screens.renderScore		
+	  };
+	  var speed = (gameSettings.globalSpeed / 6) * (0.5 + _this.game.stats.wave * 0.1);
+      _this.waveGenerator.generate(_this.game.enemies, _this.getBox(), 10, speed);
       _this.busyWave = false;
       _this.game.stats.wave += 1;
     }
@@ -105,25 +161,17 @@ GameDirector.prototype.initWave = function(timeToWait){
 GameDirector.prototype.gameHandler = function(){
   var _this = this;
 
-  if (this.game.stats.mode == 'play' && !this.busyWave && !this.game.enemies.length){
+  if (!this.busyWave && !this.game.enemies.length && this.game.stats.mode == 'play'){
     this.busyWave = true;
-    if (this.game.stats.wave > 0){
-      var intId = setInterval(function(){
-        clearInterval(intId);
-        _this.initWave(3);
-      }, 1000);
-    }
-    else this.initWave(3);
+	helper.runWithDelay(function(){ _this.initWave(3) }, 1000, this.game.stats.wave > 0);
   }
   else if (!this.busyWave && this.game.stats.mode == 'startScreen') {
+	this.busyWave = true;
     this.game.operations = { startScreen: screens.startScreen };
   }
   else if (!this.busyWave && this.game.stats.mode == 'gameOverScreen'){
     this.busyWave = true;
-    var intId = setInterval(function(){
-      clearInterval(intId);
-      this.game.operations = { gameOverScreen: screens.gameOverScreen };
-    }, 2000);
+	helper.runWithDelay(function(){ _this.game.operations = { gameOverScreen: screens.gameOverScreen } }, 2000);
   }
 };
 

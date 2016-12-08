@@ -12,6 +12,17 @@ window.helper = {
        sprite1.x > sprite2Right
      );
   },
+  
+  runWithDelay: function(func, delay, condition){	  
+	if (typeof(condition) == 'undefined') condition = true;
+	if (delay > 0 && condition){
+      var intId = setInterval(function(){
+        clearInterval(intId);
+        func();
+      }, delay);
+    }
+    else func();
+  },
 
   outOnTop: function(sprite, box){
     return (sprite.y + sprite.frameHeight < box.y);

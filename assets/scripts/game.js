@@ -40,7 +40,7 @@ var calculateCollisions = function(){
     var enemy = game.enemies[i];
     if (enemy && game.player && helper.collide(enemy, game.player)) {
       var boom = game.resources.boom;
-      game.booms.push(new Sprite(enemy.x + enemy.frameWidth / 2 - boom.frameWidth / 2, enemy.y + enemy.frameHeight - boom.frameHeight, boom, false));
+      game.booms.push(new Sprite(enemy.x + enemy.frameWidth / 2 - boom.frameWidth / 2, enemy.y + enemy.frameHeight - boom.frameHeight, boom, 5));
       game.enemies.splice(j, 1);
       game.player = null;
       game.stats.mode = 'gameOverScreen';
@@ -54,7 +54,7 @@ var calculateCollisions = function(){
       var enemy = game.enemies[j];
       if (shot && enemy && helper.collide(shot, enemy)) {
         var boom = game.resources.boom;
-        game.booms.push(new Sprite(enemy.x + enemy.frameWidth / 2 - boom.frameWidth / 2, enemy.y + enemy.frameHeight - boom.frameHeight, boom, false));
+        game.booms.push(new Sprite(enemy.x + enemy.frameWidth / 2 - boom.frameWidth / 2, enemy.y + enemy.frameHeight - boom.frameHeight, boom, 2));
         game.shots.splice(i, 1);
         game.enemies.splice(j, 1);
         game.stats.score += 1;

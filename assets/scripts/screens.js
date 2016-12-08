@@ -1,4 +1,5 @@
 var buttons = {};
+var fireButtonHeight = 50;
 
 var loading = function(game){
   this.fillStyle = '#000000';
@@ -77,6 +78,31 @@ var renderScore = function(game){
   this.restore();
 };
 
+var renderFireButton = function(game){
+  this.save();
+  
+  this.globalAlpha = 0.8;
+  this.fillStyle = '#000000';
+  this.fillRect(0, game.canvas.height - fireButtonHeight, game.canvas.width, game.canvas.height);
+
+  var fontSize = 15;
+  var text = "Touch to FIRE!";
+  var textX = game.canvas.width / 2 - (fontSize / 2 * text.length / 2), textY = game.canvas.height - fireButtonHeight / 2,
+    left = 0,
+    top = game.canvas.height - fireButtonHeight,
+    width = game.canvas.width,
+    height =  fireButtonHeight;
+	
+  this.fillStyle = '#FFFFFF';
+  this.fillRect(left, top, width, height);
+
+  this.fillStyle = '#ff0000';
+  this.font = fontSize + "px Verdana";
+  this.fillText(text, textX, textY);
+  buttons.startScreen = { action: 'playerFire', x: left, y: top, frameWidth: width, frameHeight: height }
+  this.restore();
+};
+
 var renderPrepare = function(game){
   this.save();
   game.context.fillStyle = '#000000';
@@ -90,9 +116,11 @@ var renderPrepare = function(game){
 
 window.screens = {
   buttons: buttons,
+  fireButtonHeight: fireButtonHeight,
   loading: loading,
   startScreen: startScreen,
   gameOverScreen: gameOverScreen,
   renderScore: renderScore,
+  renderFireButton: renderFireButton,
   renderPrepare: renderPrepare
 };

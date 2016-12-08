@@ -2,7 +2,6 @@ var fire = function(parentSprite, shotResource, side){
   var x = 0, y = 0, 
       speed = gameSettings.globalSpeed * (1.8 + Math.random(5) / 10), 
       coord = null;
-  try {
 
   switch(side){
     case 'top':
@@ -15,12 +14,7 @@ var fire = function(parentSprite, shotResource, side){
       x = parentSprite.x + parentSprite.frameWidth / 2 - shotResource.frameWidth / 2;
       y = parentSprite.y + parentSprite.frameHeight;  
       coord = 'y';
-  }
-
-  }
-  catch(e){
-    debugger;
-  }
+  };
   
   var shotSprite = new Sprite(x, y, shotResource);
   shotSprite.speed = speed;

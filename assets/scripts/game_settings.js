@@ -1,5 +1,5 @@
 window.gameSettings = {
-  globalSpeed: 6,
+  globalSpeed: 8,
   resources: {
     background: {
       url: 'assets/models/background.jpg',
