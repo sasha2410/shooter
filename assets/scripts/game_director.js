@@ -18,16 +18,19 @@ GameDirector.prototype.playerFire = function(){
 
 GameDirector.prototype.addEvents = function(){
   var _this = this;
-
-  this.game.canvas.addEventListener('mousedown', function(ev){
+  
+  var buttonHandler = function(ev){
     helper.prepareOffsets(ev);
 
     for(var i in screens.buttons){
       var point = { x: ev.offsetX, y: ev.offsetY, frameWidth: 1, frameHeight: 1 };
       var button = screens.buttons[i];
-      if (helper.collide(point, button)){ _this[button.action]() }
+      if (helper.collide(point, button)){ this[button.action]() }
     }
-  });
+  };
+
+  this.game.canvas.addEventListener('mousedown', function(ev){ buttonHandler.call(_this, ev) });
+  this.game.canvas.addEventListener('touchstart', function(ev){ buttonHandler.call(_this, ev) });  
 
   document.addEventListener('keydown', function(ev){
     ev.preventDefault();

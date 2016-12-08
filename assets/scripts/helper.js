@@ -37,6 +37,10 @@ window.helper = {
     ev.offsetX = ev.touches[0].pageX - $(ev.touches[0].target).offset().left;
     ev.offsetY = ev.touches[0].pageY - $(ev.touches[0].target).offset().top;
   },
+  
+  ios: function(){
+	return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;   
+  },
 
   random: function(max, min){
     if (!min){ min = 0 }
