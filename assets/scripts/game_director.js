@@ -16,10 +16,7 @@ GameDirector.prototype.playerFire = function(){
   if (this.game.player) this.game.shots.push(this.game.player.fire());
 }
 
-GameDirector.prototype.addEvents = function(){
-  var _this = this;
-  
-  var buttonHandler = function(ev){
+var buttonHandler = function(ev){
     helper.prepareOffsets(ev);
 
     for(var i in screens.buttons){
@@ -29,8 +26,10 @@ GameDirector.prototype.addEvents = function(){
     }
   };
 
-  this.game.canvas.addEventListener('mousedown', function(ev){ buttonHandler.call(_this, ev) });
-  this.game.canvas.addEventListener('touchstart', function(ev){ buttonHandler.call(_this, ev) });  
+GameDirector.prototype.addEvents = function(){
+  var _this = this;
+
+  this.game.canvas.addEventListener('mousedown', function(ev){ buttonHandler.call(_this, ev) });  
 
   document.addEventListener('keydown', function(ev){
     ev.preventDefault();
@@ -60,10 +59,16 @@ GameDirector.prototype.addEvents = function(){
     delete game.keysPressed[ev.keyCode];
   });
   
+  
+
+};
+
+GameDirector.prototype.addTouchEvents = function(){
   // touch events
+  var _this = this;
   
   var touchStart = function(ev){
-	ev.preventDefault();
+    ev.preventDefault();
 	helper.prepareOffsets(ev);
 	var player = this.game.player;
 	if (!player) return;
@@ -96,13 +101,11 @@ GameDirector.prototype.addEvents = function(){
 	delete this.game.keysPressed['touchX'];
 	delete this.game.keysPressed['touchY'];    
   }
-  
-  _this.game.canvas.addEventListener('mousedown', function(ev){ touchStart.call(_this, ev) });
-  _this.game.canvas.addEventListener('touchstart', function(ev){ touchStart.call(_this, ev) });
-	
-  _this.game.canvas.addEventListener('mouseup', function(ev){ touchEnd.call(_this, ev) });	
-  _this.game.canvas.addEventListener('touchend', function(ev){ touchEnd.call(_this, ev) });
-
+  this.game.canvas.addEventListener('touchstart', function(ev){ 
+     touchStart.call(_this, ev); 
+	 buttonHandler.call(_this, ev);
+   });
+  this.game.canvas.addEventListener('touchend', function(ev){ touchEnd.call(_this, ev) });
 };
 
 GameDirector.prototype.setLoading = function(){
@@ -142,14 +145,16 @@ GameDirector.prototype.stopWave = function(){
 
 GameDirector.prototype.initWave = function(timeToWait){
   var _this = this;
-  this.game.stats.counter = timeToWait;
-  this.game.operations = { renderPrepare: screens.renderPrepare };
   this.stopWave();
+  this.game.stats.counter = timeToWait;
+  this.game.stats.wave += 1;
+  this.game.operations = { renderPrepare: screens.renderPrepare };
+  
   this.waveId = setInterval(function(){
     if (_this.game.stats.counter > 1) _this.game.stats.counter -= 1;
     else {
+	  _this.stopWave();
 	  _this.setPlayer();
-      _this.stopWave();
       _this.game.operations = {
 	    renderFireButton: screens.renderFireButton,
         renderScore: screens.renderScore		
@@ -157,7 +162,6 @@ GameDirector.prototype.initWave = function(timeToWait){
 	  var speed = (gameSettings.globalSpeed / 6) * (0.5 + _this.game.stats.wave * 0.1);
       _this.waveGenerator.generate(_this.game.enemies, _this.getBox(), 10, speed);
       _this.busyWave = false;
-      _this.game.stats.wave += 1;
     }
   }, 1000);
 };
@@ -181,6 +185,7 @@ GameDirector.prototype.gameHandler = function(){
 
 GameDirector.prototype.run = function(){
   this.addEvents();
+  this.addTouchEvents();
   this.game.operations = {};
   this.game.stats.mode = 'startScreen';
 

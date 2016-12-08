@@ -1,5 +1,5 @@
 var buttons = {};
-var fireButtonHeight = 50;
+var fireButtonHeight = helper.ios() ? 50 : 0;
 
 var loading = function(game){
   this.fillStyle = '#000000';
@@ -125,6 +125,6 @@ window.screens = {
   startScreen: startScreen,
   gameOverScreen: gameOverScreen,
   renderScore: renderScore,
-  renderFireButton: renderFireButton,
+  renderFireButton: helper.ios() ? renderFireButton : function(){ },
   renderPrepare: renderPrepare
 };
