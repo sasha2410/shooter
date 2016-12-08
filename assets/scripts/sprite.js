@@ -14,9 +14,13 @@ Sprite.prototype.increment = function(coord, by){
   this[attr] += by;
 };
 
-Sprite.prototype.outsideOfBox = function(box){ return !helper.collide(box, this) }
+Sprite.prototype.outsideOfBox = function(box){ return !helper.collide(box, this) };
 
-Sprite.prototype.canBeRemoved = function(){ return (!this.drawRepeat && this.currentFrame == this.framesCount - 1) }
+Sprite.prototype.outOnTop = function(box){ return helper.outOnTop(this, box) };
+
+Sprite.prototype.outOnBottom = function(box){ return helper.outOnBottom(this, box) };
+
+Sprite.prototype.canBeRemoved = function(){ return (!this.drawRepeat && this.currentFrame == this.framesCount - 1) };
 
 Sprite.prototype.setToBox = function(box){
   if (this.x < box.x) this.x = box.x;
