@@ -34,8 +34,9 @@ window.helper = {
 
   prepareOffsets: function(ev) {
     if (ev.offsetX || !ev.touches) return;
-    ev.offsetX = ev.touches[0].pageX - $(ev.touches[0].target).offset().left;
-    ev.offsetY = ev.touches[0].pageY - $(ev.touches[0].target).offset().top;
+	var rect = ev.touches[0].target.getBoundingClientRect();
+    ev.offsetX = ev.touches[0].pageX - rect.left;
+    ev.offsetY = ev.touches[0].pageY - rect.top;
   },
   
   ios: function(){
