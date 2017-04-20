@@ -125,6 +125,6 @@ window.screens = {
   startScreen: startScreen,
   gameOverScreen: gameOverScreen,
   renderScore: renderScore,
-  renderFireButton: helper.ios() ? renderFireButton : function(){ },
+  renderFireButton: helper.mobile() ? renderFireButton : function(){ },
   renderPrepare: renderPrepare
 };

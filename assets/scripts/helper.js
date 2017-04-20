@@ -34,13 +34,17 @@ window.helper = {
 
   prepareOffsets: function(ev) {
     if (ev.offsetX || !ev.touches) return;
-	var rect = ev.touches[0].target.getBoundingClientRect();
+	  var rect = ev.touches[0].target.getBoundingClientRect();
     ev.offsetX = ev.touches[0].pageX - rect.left;
     ev.offsetY = ev.touches[0].pageY - rect.top;
   },
   
   ios: function(){
-	return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;   
+	  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  },
+
+  mobile: function(){
+    return /iPad|iPhone|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent) && !window.MSStream;
   },
 
   random: function(max, min){

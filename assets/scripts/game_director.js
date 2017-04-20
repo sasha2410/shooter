@@ -14,7 +14,7 @@ GameDirector.prototype.getBox = function(){ return { x: 0, y: 0, frameWidth: thi
 
 GameDirector.prototype.playerFire = function(){
   if (this.game.player) this.game.shots.push(this.game.player.fire());
-}
+};
 
 var buttonHandler = function(ev){
     helper.prepareOffsets(ev);
@@ -69,43 +69,61 @@ GameDirector.prototype.addTouchEvents = function(){
   
   var touchStart = function(ev){
     ev.preventDefault();
-	helper.prepareOffsets(ev);
-	var player = this.game.player;
-	if (!player) return;
-	 
-	var playerX = player.x + player.frameWidth / 2;
-	var playerY = player.y + player.frameHeight / 2; 
-	if (ev.offsetY >= this.game.canvas.height - screens.fireButtonHeight) return;
-	 
-	var angle = Math.atan2(ev.offsetY - playerY, ev.offsetX - playerX) * 180 / Math.PI;
-	var sign = angle < 0 ? -1 : 1;
-	var quarter = Math.floor(Math.abs(angle / 90)) + 1;
-	var quarterAngle = Math.abs(angle) - (quarter - 1) * 90;
-	var speedX, speedY;
-	switch(quarter){
-	  case 1:
-	    speedY = quarterAngle / 90 * sign;
-		speedX = (1 - Math.abs(speedY));
+    helper.prepareOffsets(ev);
+    var player = _this.game.player;
+    if (!player) return;
+    var playerCenter = player.getCenter(),
+        playerX = playerCenter.x,
+        playerY = playerCenter.y;
+
+    if (ev.offsetY >= _this.game.canvas.height - screens.fireButtonHeight) return;
+
+    var angle = Math.atan2(ev.offsetY - playerY, ev.offsetX - playerX) * 180 / Math.PI;
+    var sign = angle < 0 ? -1 : 1;
+    var quarter = Math.floor(Math.abs(angle / 90)) + 1;
+    var quarterAngle = Math.abs(angle) - (quarter - 1) * 90;
+    var speedX, speedY;
+    switch(quarter){
+      case 1:
+        speedY = quarterAngle / 90 * sign;
+        speedX = (1 - Math.abs(speedY));
         break;
       case 2:
-	    speedX = quarterAngle / 90 * -1;
-		speedY = (1 - Math.abs(speedX)) * sign;
-        break;		 
-	}
-	this.game.keysPressed.touchX = { speed: gameSettings.globalSpeed * speedX, coord: 'x' };
-	this.game.keysPressed.touchY = { speed: gameSettings.globalSpeed * speedY, coord: 'y' };
-  }
+        speedX = quarterAngle / 90 * -1;
+        speedY = (1 - Math.abs(speedX)) * sign;
+        break;
+    }
+
+    var restriction = function(){
+      var player = _this.game.player;
+      if (!player) return;
+      var playerCenter = player.getCenter();
+      var xOut = (speedX > 0) ? playerCenter.x >= ev.offsetX : playerCenter.x <= ev.offsetX;
+      var yOut = (speedY > 0) ? playerCenter.y >= ev.offsetY : playerCenter.y <= ev.offsetY;
+      if (xOut || yOut) {
+        player.moveTo(ev.offsetX, ev.offsetY);
+        delete _this.game.keysPressed['touchX'];
+        delete _this.game.keysPressed['touchY'];
+      }
+    };
+
+    this.game.keysPressed.touchX = { speed: gameSettings.globalSpeed * speedX, coord: 'x', callback: restriction };
+    this.game.keysPressed.touchY = { speed: gameSettings.globalSpeed * speedY, coord: 'y', callback: restriction };
+  };
   
   var touchEnd = function(ev){
-	ev.preventDefault();
-	delete this.game.keysPressed['touchX'];
-	delete this.game.keysPressed['touchY'];    
-  }
+    ev.preventDefault();
+    delete this.game.keysPressed['touchX'];
+    delete this.game.keysPressed['touchY'];
+  };
+
   this.game.canvas.addEventListener('touchstart', function(ev){ 
-     touchStart.call(_this, ev); 
-	 buttonHandler.call(_this, ev);
-   });
+    touchStart.call(_this, ev);
+    buttonHandler.call(_this, ev);
+  });
   this.game.canvas.addEventListener('touchend', function(ev){ touchEnd.call(_this, ev) });
+  this.game.canvas.addEventListener('mousedown', function(ev){ touchStart.call(_this, ev); });
+  this.game.canvas.addEventListener('mouseup', function(ev){ touchEnd.call(_this, ev) });
 };
 
 GameDirector.prototype.setLoading = function(){
@@ -171,15 +189,15 @@ GameDirector.prototype.gameHandler = function(){
 
   if (!this.busyWave && !this.game.enemies.length && this.game.stats.mode == 'play'){
     this.busyWave = true;
-	helper.runWithDelay(function(){ _this.initWave(3) }, 1000, this.game.stats.wave > 0);
+    helper.runWithDelay(function(){ _this.initWave(3) }, 1000, this.game.stats.wave > 0);
   }
   else if (!this.busyWave && this.game.stats.mode == 'startScreen') {
-	this.busyWave = true;
+	  this.busyWave = true;
     this.game.operations = { startScreen: screens.startScreen };
   }
   else if (!this.busyWave && this.game.stats.mode == 'gameOverScreen'){
     this.busyWave = true;
-	helper.runWithDelay(function(){ _this.game.operations = { gameOverScreen: screens.gameOverScreen } }, 2000);
+	  helper.runWithDelay(function(){ _this.game.operations = { gameOverScreen: screens.gameOverScreen } }, 2000);
   }
 };
 

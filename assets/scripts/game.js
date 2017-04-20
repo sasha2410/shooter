@@ -68,7 +68,11 @@ var calculateCollisions = function(){
 
 var update = function(){
   if (game.player){
-    for(var i in game.keysPressed){ var key = game.keysPressed[i]; game.player.increment(key.coord, key.speed) }
+    for(var i in game.keysPressed){
+      var key = game.keysPressed[i];
+      game.player.increment(key.coord, key.speed);
+      if (key.callback) key.callback();
+    }
   }
   for(var i in game.shots){ var shot = game.shots[i]; shot.increment(shot.coord, shot.speed) }
   for(var i in game.enemies){ var enemy = game.enemies[i]; enemy.increment(enemy.coord, enemy.speed) }

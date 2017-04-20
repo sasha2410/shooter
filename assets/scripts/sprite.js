@@ -25,6 +25,18 @@ Sprite.prototype.canBeRemoved = function(){
   return (this.drawRepeat > 0 && this.fullCycleCount == this.drawRepeat ) 
 };
 
+Sprite.prototype.moveTo = function(x, y){
+  this.x = x - this.frameWidth / 2;
+  this.y = y - this.frameHeight / 2;
+};
+
+Sprite.prototype.getCenter = function(){
+  return {
+    x: this.x + this.frameWidth / 2,
+    y: this.y + this.frameHeight / 2
+  }
+};
+
 Sprite.prototype.setToBox = function(box){
   if (this.x < box.x) this.x = box.x;
   if (this.y < box.y) this.y = box.y;
@@ -51,14 +63,14 @@ Sprite.prototype.fire = function(shotResource, side){
       x = this.x + this.frameWidth / 2 - shotResource.frameWidth / 2;
       y = this.y + this.frameHeight;  
       coord = 'y';
-  };
+  }
   
   var shotSprite = new Sprite(x, y, shotResource);
   shotSprite.speed = speed;
   shotSprite.coord = coord;
 
   return shotSprite;
-}
+};
 
 Sprite.prototype.render = function(context){
   context.drawImage(this.image, this.currentFrame * this.frameWidth, 0, this.frameWidth, this.frameHeight, this.x, this.y, this.frameWidth, this.frameHeight);
