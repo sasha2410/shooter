@@ -79,17 +79,30 @@ var update = function(){
   if (game.player) { game.player.setToBox(gameDirector.getBox()); }
 };
 
-var lastTime;
+var lastTime = Date.now(), correctTime = 0.02;
 
-var main = function(){
-  var now = Date.now();
-  var dt = (now - lastTime) / 1000.0;
+
+var nextUpdate = function(){
   filterArrays();
   calculateCollisions();
   update();
   render();
-  lastTime = now;
+};
+
+var main = function(){
+  var now = Date.now();
+  var dt = (now - lastTime) / 1000.0;
+
+  nextUpdate();
+
+  // Set up 60 frames per seconds for every device
+  if (dt > correctTime) {
+    var number = Math.ceil(dt / correctTime);
+    for(var i = 1; i< number; i++){ helper.runWithDelay(function(){ nextUpdate() }, i * correctTime, true); }
+  }
+
   requestAnimationFrame(main);
+  lastTime = now;
 };
 
 var maxWidth = 600, maxHeight = 600;
