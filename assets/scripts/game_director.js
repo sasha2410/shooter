@@ -208,7 +208,7 @@ GameDirector.prototype.run = function(){
   this.game.stats.mode = 'startScreen';
 
   var _this = this;
-  setInterval(function(){ _this.gameHandler() }, 100);
+  setInterval(function(){ _this.gameHandler() }, gameSettings.correctUpdateTime);
 };
 
 window.GameDirector = GameDirector;

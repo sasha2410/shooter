@@ -17,14 +17,15 @@ var startScreen = function(game){
   this.fillStyle = '#FFFFFF';
 
   var fontSize = 30;
-  var text = "Click to start";
-  var textX = game.canvas.width / 2 - (fontSize / 2 * text.length / 2), textY = game.canvas.height / 2 - fontSize / 2, buttonPadding = 10,
+  var text = "PLAY";
+  var textX = game.canvas.width / 2 - (fontSize / 1.5 * text.length / 2), textY = game.canvas.height / 2 - fontSize / 2, buttonPadding = 10,
     left = textX - buttonPadding,
     top = textY - fontSize - buttonPadding / 2,
-    width = (fontSize / 2) * text.length + buttonPadding,
+    width = (fontSize / 1.5) * text.length + 1.5 * buttonPadding,
     height =  fontSize + 2 * buttonPadding;
 
   this.fillRect(left, top, width, height);
+  buttons.startScreen = { action: 'initGame', x: left, y: top, frameWidth: width, frameHeight: height };
 
   this.strokeStyle = '#000000';
   this.fillStyle = '#000000';
@@ -34,8 +35,7 @@ var startScreen = function(game){
   this.fillStyle = '#ffffff';
 
   text = 'ALIEN SHOOTER';
-  this.fillText('ALIEN SHOOTER', game.canvas.width / 2 - (fontSize / 1.5 * text.length / 2), game.canvas.height / 2 - fontSize / 2 - fontSize * 2);
-  buttons.startScreen = { action: 'initGame', x: left, y: top, frameWidth: width, frameHeight: height }
+  this.fillText('ALIEN SHOOTER', (game.canvas.width / 2) - ((fontSize / 1.5 * text.length) / 2), game.canvas.height / 2 - fontSize / 2 - fontSize * 2);
 };
 
 var gameOverScreen = function(game){
@@ -45,36 +45,47 @@ var gameOverScreen = function(game){
   this.fillStyle = '#FFFFFF';
 
   var fontSize = 30;
-  var text = "Click to start again";
+  var text = "Start again";
   var textX = game.canvas.width / 2 - (fontSize / 2 * text.length / 2), textY = game.canvas.height / 2 - fontSize / 2, buttonPadding = 10,
     left = textX - buttonPadding,
     top = textY - fontSize - buttonPadding / 2,
-    width = (fontSize / 2) * text.length + buttonPadding,
+    width = (fontSize / 2) * text.length + 2 * buttonPadding,
     height =  fontSize + 2 * buttonPadding;
-
   this.fillRect(left, top, width, height);
+  buttons.gameOverScreen = { action: 'initGame', x: left, y: top, frameWidth: width, frameHeight: height };
 
   this.strokeStyle = '#000000';
   this.fillStyle = '#000000';
   this.font = fontSize + "px Verdana";
   this.fillText(text, textX, textY);
 
+  fontSize = 30;
+  this.font = fontSize + "px Verdana";
   this.fillStyle = '#ffffff';
-  this.fillText('You lost. Try again?', textX, textY - fontSize * 2);
-  buttons.gameOverScreen = { action: 'initGame', x: left, y: top, frameWidth: width, frameHeight: height }
+
+  text = 'You were failed';
+  textX = game.canvas.width / 2 - (fontSize / 2 * text.length / 2);
+  this.fillText(text, textX, textY - fontSize * 4);
+
+  text = 'to save the Earth!';
+  textX = game.canvas.width / 2 - (fontSize / 2 * text.length / 2);
+  this.fillText(text, textX, textY - fontSize * 2.5);
+
 };
 
 var renderScore = function(game){
+  var fontSize = 14;
+  var textScore = "Score: " + game.stats.score;
+  var textWave = "Wave Number: " + game.stats.wave;
   this.save();
   this.globalAlpha = 0.8;
   this.fillStyle = '#000000';
   this.fillRect(0, 0, game.canvas.width, 30);
   this.globalAlpha = 1;
   this.strokeStyle = '#ffffff';
-  this.font = "14px Verdana";
-  this.strokeText("Score : " + game.stats.score, 0, 15);
-  var waveText = "Wave Number : " + game.stats.wave;
-  this.strokeText(waveText, game.canvas.width - (waveText.length * 14), 15);
+  this.font = fontSize + "px Verdana";
+  this.strokeText(textScore, 0, 15);
+  this.strokeText(textWave, game.canvas.width - (textWave.length * fontSize), 15);
   this.restore();
 };
 

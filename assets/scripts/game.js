@@ -62,8 +62,6 @@ var calculateCollisions = function(){
       }
     }
   }
-
-
 };
 
 var update = function(){
@@ -79,8 +77,7 @@ var update = function(){
   if (game.player) { game.player.setToBox(gameDirector.getBox()); }
 };
 
-var lastTime = Date.now(), correctTime = 0.02;
-
+var lastTime = Date.now();
 
 var nextUpdate = function(){
   filterArrays();
@@ -95,10 +92,12 @@ var main = function(){
 
   nextUpdate();
 
+  var correctTime = gameSettings.correctUpdateTime;
+
   // Set up 60 frames per seconds for every device
   if (dt > correctTime) {
     var number = Math.ceil(dt / correctTime);
-    for(var i = 1; i< number; i++){ helper.runWithDelay(function(){ nextUpdate() }, i * correctTime, true); }
+    for(var i = 1; i < number; i++){ helper.runWithDelay(function(){ nextUpdate() }, i * correctTime, true); }
   }
 
   requestAnimationFrame(main);
