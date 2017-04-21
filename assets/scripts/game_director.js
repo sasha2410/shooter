@@ -1,6 +1,5 @@
 var GameDirector = function(game){
   this.game = game;
-  this.backgroundResource = game.resources.background;
   this.playerResource = game.resources.playerShip;
   this.busyWave = false;
   this.waveGenerator = new WaveGenerator([
@@ -130,9 +129,19 @@ GameDirector.prototype.setLoading = function(){
   this.game.operations.loading = screens.loading;
 };
 
-GameDirector.prototype.setBackground = function(){
-  var r = this.backgroundResource;
-  this.game.background.getContext('2d').drawImage(r.cachedImage, 0, 0, game.canvas.width, game.canvas.height, 0, 0, game.canvas.width, game.canvas.height);
+GameDirector.prototype.renderBackground = function(){
+  var backgroundImage = new BackgroundImage(
+    this.getBox(),
+    [
+      gameSettings.resources.background1,
+      gameSettings.resources.background2,
+      gameSettings.resources.background3,
+      gameSettings.resources.background4,
+      gameSettings.resources.background5
+    ]
+  );
+  backgroundImage.shuffle();
+  backgroundImage.render(this.game.backgroundContext);
 };
 
 GameDirector.prototype.setPlayer = function(){
@@ -143,8 +152,8 @@ GameDirector.prototype.setPlayer = function(){
 
 GameDirector.prototype.initGame = function(){
   this.stopWave();
-  this.setBackground();
   this.setPlayer();
+  this.renderBackground();
   this.game.shots = [];
   this.game.enemies = [];
   this.game.booms = [];
@@ -189,7 +198,10 @@ GameDirector.prototype.gameHandler = function(){
 
   if (!this.busyWave && !this.game.enemies.length && this.game.stats.mode == 'play'){
     this.busyWave = true;
-    helper.runWithDelay(function(){ _this.initWave(3) }, 1000, this.game.stats.wave > 0);
+    helper.runWithDelay(function(){
+      _this.renderBackground();
+      _this.initWave(3)
+    }, 1000, this.game.stats.wave > 0);
   }
   else if (!this.busyWave && this.game.stats.mode == 'startScreen') {
 	  this.busyWave = true;

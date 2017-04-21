@@ -13,6 +13,7 @@ var game = {
   canvas: null,
   context: null,
   background: null,
+  backgroundContext: null,
   rootEl: null,
   // mode: [startScreen, gameOverScreen, play, ]
   stats: { score: 0, wave: 0, mode: 'startScreen' }
@@ -22,9 +23,9 @@ var loader = new ResourcesLoader(game.resources), gameDirector = new GameDirecto
 
 var render = function(){
   game.context.clearRect(0, 0, game.canvas.width, game.canvas.height);
-  for(var i in game.shots){ game.shots[i].render(game.context) };
-  for(var i in game.enemies){ game.enemies[i].render(game.context) };
-  for(var i in game.booms){ game.booms[i].render(game.context) };
+  for(var i in game.shots){ game.shots[i].render(game.context) }
+  for(var i in game.enemies){ game.enemies[i].render(game.context) }
+  for(var i in game.booms){ game.booms[i].render(game.context) }
   if (game.player) game.player.render(game.context);
   for(var i in game.operations) { game.operations[i].call(game.context, game) }
 };
@@ -107,11 +108,11 @@ var main = function(){
 var maxWidth = 600, maxHeight = 600;
 
 var setCanvas = function(){
-  var ios = helper.ios();
+  var iPad = helper.iPad();
   var dw =  window.innerWidth; //ios ? screen.width : window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
   var dh = window.innerHeight; //ios ? screen.height : window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-  var width = dw > maxWidth ? maxWidth : dw;
-  var height = dh > maxHeight ? maxHeight : dh;
+  var width = dw > maxWidth && !iPad ? maxWidth : dw;
+  var height = dh > maxHeight && !iPad ? maxHeight : dh;
   if (game.canvas) {
     game.rootEl.style.width = width + 'px';
     game.rootEl.style.height = height + 'px';
@@ -120,6 +121,7 @@ var setCanvas = function(){
     game.canvas.width = width;
     game.canvas.height = height;
     game.context = game.canvas.getContext('2d');
+    game.backgroundContext = game.background.getContext('2d');
   }
 };
 

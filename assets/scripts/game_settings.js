@@ -2,8 +2,39 @@ window.gameSettings = {
   globalSpeed: 8,
   correctUpdateTime: 0.2,
   resources: {
-    background: {
-      url: 'assets/models/background.jpg',
+    background1: {
+      url: 'assets/backgrounds/back1.jpg',
+      framesCount: 1,
+      frameWidth: 1920,
+      frameHeight: 1080,
+      cachedImage: null
+    },
+    background2: {
+      url: 'assets/backgrounds/back2.jpg',
+      framesCount: 1,
+      frameWidth: 2560,
+      frameHeight: 1600,
+      cachedImage: null
+    },
+    background3: {
+      url: 'assets/backgrounds/back2.jpg',
+      framesCount: 1,
+      frameWidth: 1920,
+      frameHeight: 1080,
+      cachedImage: null
+    },
+    background4: {
+      url: 'assets/backgrounds/back4.jpg',
+      framesCount: 1,
+      frameWidth: 1920,
+      frameHeight: 1080,
+      cachedImage: null
+    },
+    background5: {
+      url: 'assets/backgrounds/back5.jpg',
+      framesCount: 1,
+      frameWidth: 1920,
+      frameHeight: 1080,
       cachedImage: null
     },
     playerShip: { 

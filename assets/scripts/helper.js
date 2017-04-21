@@ -38,6 +38,10 @@ window.helper = {
     ev.offsetX = ev.touches[0].pageX - rect.left;
     ev.offsetY = ev.touches[0].pageY - rect.top;
   },
+
+  iPad: function(){
+    return /iPad/.test(navigator.userAgent);
+  },
   
   ios: function(){
 	  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
